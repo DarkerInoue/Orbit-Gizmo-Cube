@@ -1,7 +1,7 @@
 # Orbit Gizmo Cube
 
 **Author:** Darker Inoue  
-**Version:** 1.5.0  
+**Version:** 1.0.1  
 **License:** GNU General Public License v3.0 or later  
 **Minimum Blender version:** 5.1.0
 
