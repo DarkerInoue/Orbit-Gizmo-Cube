@@ -70,7 +70,7 @@ def _tick():
                     for space in area.spaces:
                         if space.type == 'VIEW_3D' and fit(space):
                             area.tag_redraw()
-    except Exception:  # noqa: BLE001
+    except Exception:  
         pass
     return INTERVAL
 
@@ -86,5 +86,5 @@ def stop():
     try:
         if bpy.app.timers.is_registered(_tick):
             bpy.app.timers.unregister(_tick)
-    except Exception:  # noqa: BLE001
+    except Exception:  
         pass
