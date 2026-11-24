@@ -36,11 +36,11 @@ def status(message):
             """Limpia el mensaje temporal de la barra de estado. Esta función interna se ejecuta cuando termina el tiempo que se asignó al aviso."""
             try:
                 bpy.context.workspace.status_text_set(None)
-            except Exception:  # noqa: BLE001
+            except Exception:  
                 pass
             return None
         bpy.app.timers.register(_clear, first_interval=3.0)
-    except Exception:  # noqa: BLE001
+    except Exception:  
         pass
 
 
