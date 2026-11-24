@@ -82,7 +82,7 @@ def watch():
         for scene in bpy.data.scenes:
             bpy.msgbus.subscribe_rna(key=scene.unit_settings, owner=_owner,
                                      args=(scene.name,), notify=_notify)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:  
         print("%s: units watcher not started: %s" % (__package__, exc))
     return None
 
@@ -91,5 +91,5 @@ def unwatch():
     """Desactiva el seguimiento de cambios de unidades y retira los mecanismos registrados para que no sigan ejecutándose cuando el complemento se deshabilite."""
     try:
         bpy.msgbus.clear_by_owner(_owner)
-    except Exception:  # noqa: BLE001
+    except Exception:  
         pass
