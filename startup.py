@@ -9,7 +9,7 @@ from bpy.props import PointerProperty
 from . import (clip, constants, grid, gizmo, hud, ops, panels, primitives,
                settings, unit_ops)
 
-# Primero se registran los grupos de propiedades, ya que los operadores y paneles necesitan acceder a ellos.
+# Registran los grupos de propiedades, ya que los operadores y paneles necesitan acceder a ellos.
 _CLASSES = ((settings.VC_Settings, settings.VC_UnitSettings)
             + ops.classes + unit_ops.classes + gizmo.classes + panels.classes)
 
