@@ -14,16 +14,16 @@ def build(right, top, ui_scale, size, show_navbar=True,
           buttons=constants.BUTTONS):
     """Calcula la distribución completa del cubo de navegación dentro de la región. Tiene en cuenta el espacio disponible, la escala de interfaz, el tamaño configurado y si la barra de herramientas está visible."""
     sc = ui_scale
-    S = size * sc                       # nominal size of the cube widget
-    H = S * 0.56                        # half of its footprint
+    S = size * sc                       # tamaño nominal del widget del cubo
+    H = S * 0.56                        # mitad del área que ocupa el cubo
     cx = right - 10 * sc - H
     cy = top - 10 * sc - H
-    d = 34 * sc                         # one toolbar cell, square-ish
+    d = 34 * sc                         # una celda de la barra de herramientas, casi cuadrada
 
     L = Layout()
     L.sc, L.S, L.H = sc, S, H
     L.cx, L.cy = cx, cy
-    L.s = S * 0.25                      # cube units -> pixels
+    L.s = S * 0.25                      # unidades del cubo -> píxeles
     L.arrow_size = 0.06 * S
     L.arrow_hit = 0.09 * S
     L.arrows = {
@@ -33,19 +33,19 @@ def build(right, top, ui_scale, size, show_navbar=True,
         "ROLL_R": (cx + 0.46 * S, cy + 0.46 * S),
     }
 
-    # Toolbar: one rounded panel, N equal cells stacked under the cube.
-    # The hit rectangle of a cell is exactly the cell that is drawn.
+    # Barra de herramientas: un único panel redondeado con N celdas iguales apiladas debajo del cubo.
+    # El área de interacción de cada celda coincide exactamente con su área dibujada.
     L.show_navbar = bool(show_navbar)
     L.btn_d = d
-    L.btn_hw = d * 0.61                 # half width  of a cell
-    L.btn_hh = d * 0.5                  # half height of a cell
-    y0 = cy - H - 8 * sc - d / 2        # centre of the first cell
+    L.btn_hw = d * 0.61                 # mitad del ancho de una celda
+    L.btn_hh = d * 0.5                  # mitad de la altura de una celda
+    y0 = cy - H - 8 * sc - d / 2        # centro de la primera celda
     L.buttons = [(name, (cx, y0 - k * d)) for k, name in enumerate(buttons)]
     n = len(buttons)
     pad = 5 * sc
-    L.panel = (cx, y0 - (n - 1) * d / 2.0,      # centre x, centre y
-               L.btn_hw * 2, n * d + 2 * pad)   # width, height
-    L.icon_k = d * 0.30                 # icon half-extent in pixels
+    L.panel = (cx, y0 - (n - 1) * d / 2.0,      # centro X, centro Y
+               L.btn_hw * 2, n * d + 2 * pad)   # ancho, alto
+    L.icon_k = d * 0.30                 # mitad del tamaño del icono en píxeles
     return L
 
 
