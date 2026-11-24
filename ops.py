@@ -32,13 +32,13 @@ class VC_OT_set_view(bpy.types.Operator):
         """Inicia el cambio de vista solicitado. Guarda la orientación, el centro y la distancia actuales, prepara el temporizador de animación y determina el destino de la transición."""
         rv3d = context.region_data
         s = getattr(context.window_manager, constants.PROP)
-        # A camera view has no rotation of its own to animate from.
+        # La vista de la cámara no tiene rotación propia a partir de la cual animar.
         actions.leave_camera(context)
         self.q0 = actions.current_rotation(context)
         self.q1 = Quaternion(self.rotation).normalized()
         if self.q0.dot(self.q1) < 0:
             self.q1 = Quaternion([-c for c in self.q1])
-        # The projection - perspective or orthographic - is left as it is.
+        # La proyección, ya sea en perspectiva u ortográfica, se deja tal cual.
         self.l0, self.d0 = rv3d.view_location.copy(), rv3d.view_distance
         self.l1, self.d1 = self.l0.copy(), self.d0
         if self.frame:
@@ -89,7 +89,7 @@ class VC_OT_set_view(bpy.types.Operator):
         """Limpia los recursos de la animación cuando Blender cancela el operador. Comprueba que el temporizador pueda retirarse sin provocar un error adicional."""
         try:
             self._end(context)
-        except Exception:  # noqa: BLE001
+        except Exception:  
             pass
 
 
