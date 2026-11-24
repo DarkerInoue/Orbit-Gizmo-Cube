@@ -23,7 +23,7 @@ def _after_load():
         u = grid.settings_for(bpy.context.scene)
         if u is not None and u.native_primitives:
             primitives.apply(bpy.context.scene)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:  
         print("%s: native primitives not applied: %s" % (__package__, exc))
     return None
 
@@ -55,7 +55,7 @@ def unregister():
     try:
         getattr(bpy.context.window_manager, constants.PROP).enabled = False
         settings.apply_native()                 # Se devuelve a Blender la visibilidad de su gizmo nativo.
-    except Exception:  # noqa: BLE001
+    except Exception:  
         pass
     if _on_load in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.remove(_on_load)
