@@ -136,10 +136,12 @@ def project_cells(view_quat, cx, cy, scale):
     out = []
     for cell in CELLS:
         facing = mul_mv(r, cell["n"])[2]
-        # A face seen exactly edge-on has float noise for a "facing" of
-        # 1e-17 and a flat polygon; point_in_convex says yes to any point
-        # of a flat polygon, so it would swallow clicks meant for the
-        # cells beside it. Only cells with real area count.
+        # Evita que las caras sin área válida intercepten clics.
+        # Cuando una cara se observa exactamente de perfil, los errores de
+        # precisión pueden generar un área prácticamente nula (1e-17).
+        # En estos casos, point_in_convex puede detectar puntos dentro de
+        # un polígono plano y bloquear los clics destinados a otras celdas.
+        # Solo se permiten interacciones con caras que tengan un área real.
         if facing <= 1e-6:
             continue
         poly = []
