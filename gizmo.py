@@ -14,13 +14,13 @@ class VC_GT_cube(bpy.types.Gizmo):
 
     def draw(self, context):
         """Dibuja el gizmo en la vista 3D. La parte visual del cubo y sus controles se delega al sistema HUD para mantener separadas la interacción y la representación."""
-        pass                       # painted by hud.draw_viewcube
+        pass                       
 
     def test_select(self, context, location):
         """Determina si el cursor está encima de alguna zona interactiva del gizmo. Devuelve el identificador de selección correspondiente para que Blender sepa cuándo puede activarse."""
         try:
             hit = hud.pick(context, location)
-        except Exception:  # noqa: BLE001
+        except Exception:  
             hit = None
         state = hud.st(context.region)
         if state.get("hit") != hit:
