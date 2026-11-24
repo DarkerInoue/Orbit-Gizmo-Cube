@@ -25,7 +25,7 @@ class VC_OT_set_units(bpy.types.Operator):
         us = scene.unit_settings
         u = grid.settings_for(scene)
         try:
-            # Primero se cambia el sistema de unidades, porque las unidades de longitud disponibles dependen de esta opción.
+            # cambia el sistema de unidades, porque las unidades de longitud disponibles dependen de esta opción.
             us.system = units.system_of(self.unit)
             us.length_unit = self.unit
         except (TypeError, ValueError) as exc:
