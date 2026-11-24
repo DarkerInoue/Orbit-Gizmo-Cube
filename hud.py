@@ -11,7 +11,7 @@ from gpu_extras.batch import batch_for_shader
 
 from . import actions, constants, cube_math, icons, layout
 
-_state = {}          # per region: hover, drag, press ...
+_state = {}          
 _shader = None
 _handle = None
 
@@ -38,7 +38,7 @@ def get_shader():
             try:
                 _shader = gpu.shader.from_builtin(name)
                 break
-            except Exception:  # noqa: BLE001
+            except Exception:  
                 continue
     return _shader
 
@@ -300,7 +300,7 @@ def remove():
     if _handle is not None:
         try:
             bpy.types.SpaceView3D.draw_handler_remove(_handle, 'WINDOW')
-        except Exception:  # noqa: BLE001
+        except Exception:  
             pass
         _handle = None
     _state.clear()
