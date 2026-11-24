@@ -4,6 +4,7 @@
 **Version:** 1.0.1  
 **License:** GNU General Public License v3.0 or later  
 **Minimum Blender version:** 5.1.0
+**Github:** https://github.com/DarkerInoue/Orbit-Gizmo-Cube
 
 Orbit Gizmo Cube adds an orange viewport orbit gizmo cube and a compact toolbar to the 3D View. It also includes scene-unit conversion and viewport-grid controls.
 
