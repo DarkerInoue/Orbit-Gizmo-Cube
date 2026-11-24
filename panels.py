@@ -38,7 +38,7 @@ def _unit_button(row, uid, active):
     try:
         op = row.operator("viewcube_nav.set_units", text=units.symbol(uid),
                           depress=active)
-    except TypeError:              # no `depress` in this Blender
+    except TypeError:              
         op = row.operator("viewcube_nav.set_units", text=units.symbol(uid))
     op.unit = uid
 
