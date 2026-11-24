@@ -16,8 +16,8 @@ def stroke(points, w, closed=False):
         if length < 1e-9:
             continue
         ux, uy = dx / length, dy / length
-        nx, ny = -uy * w / 2, ux * w / 2        # sideways
-        ex, ey = ux * w / 2, uy * w / 2         # overshoot, closes the joints
+        nx, ny = -uy * w / 2, ux * w / 2        
+        ex, ey = ux * w / 2, uy * w / 2         
         p0 = (a[0] - ex + nx, a[1] - ey + ny)
         p1 = (b[0] + ex + nx, b[1] + ey + ny)
         p2 = (b[0] + ex - nx, b[1] + ey - ny)
@@ -83,7 +83,7 @@ def _camera(w, _state):
 
 def _projection(w, perspective):
     """Construye el icono que representa el cambio entre perspectiva y proyección ortográfica. Su aspecto depende del modo activo."""
-    if perspective:      # a floor receding to a point: converging lines
+    if perspective:     
         return (stroke([(-0.95, -0.72), (0.95, -0.72), (0.45, 0.72),
                         (-0.45, 0.72)], w, closed=True)
                 + stroke([(-0.32, -0.72), (-0.15, 0.72)], w * 0.8)
