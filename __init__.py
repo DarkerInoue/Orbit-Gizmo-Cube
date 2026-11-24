@@ -1,7 +1,6 @@
-
 #Orbit Gizmo Cube Add-on
-
 # Created by Darker Inoue
+
 import importlib
 
 # Lista de módulos del addon en orden de dependencia
