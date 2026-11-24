@@ -25,7 +25,7 @@ def apply_native(self=None, context=None):
     try:
         wm = bpy.context.window_manager
         s = getattr(wm, constants.PROP)
-    except Exception:  # noqa: BLE001
+    except Exception:  
         return
     hide = s.enabled and s.hide_native
     for win in wm.windows:
