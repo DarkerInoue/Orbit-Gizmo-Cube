@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 
 import bpy
-from bpy.props import BoolProperty, FloatVectorProperty
+from bpy.props import BoolProperty, FloatVectorProperty, StringProperty
 from mathutils import Quaternion
 
 from . import actions, constants
@@ -21,6 +21,7 @@ class VC_OT_set_view(bpy.types.Operator):
     rotation: FloatVectorProperty(size=4, subtype='QUATERNION',
                                   default=(1, 0, 0, 0))
     frame: BoolProperty(default=True)
+    axis: StringProperty(default="")   # FRONT, BACK, TOP... o vacío si no es una cara
 
     @classmethod
     def poll(cls, context):
@@ -34,6 +35,7 @@ class VC_OT_set_view(bpy.types.Operator):
         s = getattr(context.window_manager, constants.PROP)
         # La vista de la cámara no tiene rotación propia a partir de la cual animar.
         actions.leave_camera(context)
+        actions.unlock_axis_view(context)
         self.q0 = actions.current_rotation(context)
         self.q1 = Quaternion(self.rotation).normalized()
         if self.q0.dot(self.q1) < 0:
@@ -48,6 +50,7 @@ class VC_OT_set_view(bpy.types.Operator):
         self.dur = s.anim_time
         if self.dur <= 0.001:
             self._apply(context, 1.0)
+            self._finish(context)
             return {'FINISHED'}
         self.t0 = time.time()
         wm = context.window_manager
@@ -65,6 +68,13 @@ class VC_OT_set_view(bpy.types.Operator):
         rv3d.view_distance = self.d0 + (self.d1 - self.d0) * e
         actions.redraw(context)
 
+    def _finish(self, context):
+        """Al llegar a una cara del cubo, deja la vista registrada como Frontal / Trasera / Superior... para que Blender dibuje la cuadrícula y los ejes del plano."""
+        if not self.axis:
+            return
+        s = getattr(context.window_manager, constants.PROP)
+        actions.snap_axis_view(context, self.axis, s.axis_ortho)
+
     def _end(self, context):
         """Detiene la animación y elimina el temporizador que se había registrado para actualizar la vista."""
         context.window_manager.event_timer_remove(self._timer)
@@ -76,6 +86,7 @@ class VC_OT_set_view(bpy.types.Operator):
             self._apply(context, 1 - (1 - t) ** 3)
             if t >= 1.0:
                 self._end(context)
+                self._finish(context)
                 return {'FINISHED'}
             return {'RUNNING_MODAL'}
         if event.value == 'PRESS' and event.type in {

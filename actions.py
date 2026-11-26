@@ -81,6 +81,66 @@ def toggle_projection(context):
     redraw(context)
 
 
+##------ VISTAS ALINEADAS CON UN EJE ------##
+# Dirección de la cara del cubo -> nombre de vista de Blender.
+AXIS_VIEWS = {
+    (0, -1, 0): 'FRONT', (0, 1, 0): 'BACK',
+    (1, 0, 0): 'RIGHT',  (-1, 0, 0): 'LEFT',
+    (0, 0, 1): 'TOP',    (0, 0, -1): 'BOTTOM',
+}
+
+# Regiones que dejamos en una vista de eje -> proyección que tenían antes
+# ('PERSP' si la cambiamos a ortográfica, None si no hubo cambio).
+_axis_regions = {}
+
+
+def snap_axis_view(context, axis, ortho=True):
+    """Registra en Blender que la vista quedó alineada con un eje (Frontal, Trasera, Superior...). Si solo se cambia view_rotation, Blender sigue mostrando 'User Perspective' y no dibuja la cuadrícula ni los ejes del plano; view_axis deja la vista como una vista lateral real. Con ortho=True además pasa a ortográfica, como hace Blender con Auto Perspective."""
+    rv3d = context.region_data
+    if rv3d is None or rv3d.view_perspective == 'CAMERA':
+        return
+    prev = rv3d.view_perspective
+    view = context.preferences.view
+    old = view.smooth_view
+    try:
+        view.smooth_view = 0
+        bpy.ops.view3d.view_axis(type=axis)
+    except RuntimeError:
+        return
+    finally:
+        view.smooth_view = old
+    want = 'ORTHO' if ortho else prev
+    if rv3d.view_perspective != want:
+        rv3d.view_perspective = want
+    _axis_regions[context.region.as_pointer()] = (
+        'PERSP' if (want == 'ORTHO' and prev == 'PERSP') else None)
+    redraw(context)
+
+
+def unlock_axis_view(context):
+    """Sale de una vista de eje antes de girar la vista a mano. Sin esto Blender seguiría mostrando 'Back Orthographic' (y su cuadrícula lateral) mientras la vista ya está girada. Si el addon había cambiado la proyección a ortográfica, la devuelve a perspectiva."""
+    rv3d = context.region_data
+    if rv3d is None or rv3d.view_perspective == 'CAMERA':
+        return
+    key = context.region.as_pointer()
+    if not (rv3d.is_orthographic_side_view or key in _axis_regions):
+        return
+    restore = _axis_regions.pop(key, None)
+    persp = rv3d.view_perspective
+    view = context.preferences.view
+    old = view.smooth_view
+    try:
+        view.smooth_view = 0
+        bpy.ops.view3d.view_orbit(type='ORBITLEFT', angle=0.0)
+    except RuntimeError:
+        pass
+    finally:
+        view.smooth_view = old
+    want = restore if (restore and persp == 'ORTHO') else persp
+    if rv3d.view_perspective != want:
+        rv3d.view_perspective = want
+
+
 ##------ ENCUADRE DE LA ESCENA ------##
 def compute_frame(context, rot):
     """Calcula la posición y la distancia necesarias para encuadrar los objetos seleccionados desde la orientación indicada. Tiene en cuenta sus límites visibles y el margen configurado para que no queden demasiado pegados a los bordes."""

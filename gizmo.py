@@ -55,6 +55,7 @@ class VC_GT_cube(bpy.types.Gizmo):
                 if state["dragging"]:
                     if not state["left_camera"]:
                         actions.leave_camera(context)
+                        actions.unlock_axis_view(context)
                         state["left_camera"] = True
                     actions.rotate_drag(context, x - last[0], y - last[1])
             elif kind == "BUTTON" and val == "ZOOM":
@@ -83,8 +84,9 @@ class VC_GT_cube(bpy.types.Gizmo):
         s = getattr(context.window_manager, constants.PROP)
         if kind == "CELL":
             q = cube_math.rotation_from_dir(val)
-            bpy.ops.viewcube_nav.set_view('INVOKE_DEFAULT', rotation=q,
-                                          frame=True)
+            bpy.ops.viewcube_nav.set_view(
+                'INVOKE_DEFAULT', rotation=q, frame=True,
+                axis=actions.AXIS_VIEWS.get(tuple(val), ""))
         elif kind == "ARROW":
             q = actions.arrow_rotation(actions.current_rotation(context), val,
                                        s.step_angle)

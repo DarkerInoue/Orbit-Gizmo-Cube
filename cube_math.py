@@ -4,45 +4,94 @@ from __future__ import annotations
 
 import math
 
-# Cada cara se divide en una cuadrícula de 3 × 3: el centro representa la cara,
-# los lados representan las aristas y las esquinas representan los vértices. En total hay 26 direcciones.
-_E = 0.72
-_RANGES = {-1: (-1.0, -_E), 0: (-_E, _E), 1: (_E, 1.0)}
-_FACES = (
-    # nombre, normal de la zona, eje local horizontal (texto hacia la derecha) y eje local vertical (texto hacia arriba)
-    ("FRONT",  (0, -1, 0), (1, 0, 0),   (0, 0, 1)),
-    ("BACK",   (0, 1, 0),  (-1, 0, 0),  (0, 0, 1)),
-    ("RIGHT",  (1, 0, 0),  (0, 1, 0),   (0, 0, 1)),
-    ("LEFT",   (-1, 0, 0), (0, -1, 0),  (0, 0, 1)),
-    ("TOP",    (0, 0, 1),  (1, 0, 0),   (0, 1, 0)),
-    ("BOTTOM", (0, 0, -1), (1, 0, 0),   (0, -1, 0)),
-)
+# La figura es un cubo con las aristas y las esquinas biseladas (un cuboctaedro truncado
+# no uniforme): 6 caras octogonales, 12 aristas rectangulares y 8 esquinas hexagonales.
+# Siguen siendo 26 zonas seleccionables, una por cada dirección (x, y, z) con
+# componentes en {-1, 0, 1}.
+#
+# El sólido es la intersección de 26 semiespacios  dir · p <= offset:
+#   - caras   (1 componente distinta de 0):  |x|, |y|, |z| <= 1
+#   - aristas (2 componentes):               |x| + |y| <= EDGE_CUT   (y análogos)
+#   - esquinas(3 componentes):               |x| + |y| + |z| <= CORNER_CUT
+# EDGE_CUT entre 1 y 2: cuanto menor, más ancha es la franja de la arista.
+# CORNER_CUT entre 2 y 3: cuanto menor, más grande es el hexágono de la esquina.
+EDGE_CUT = 1.72
+CORNER_CUT = 2.27
+
+# Eje local horizontal (texto hacia la derecha) de cada cara, para orientar la etiqueta.
+_FACES = {
+    (0, -1, 0): ("FRONT",  (1, 0, 0)),
+    (0, 1, 0):  ("BACK",   (-1, 0, 0)),
+    (1, 0, 0):  ("RIGHT",  (0, 1, 0)),
+    (-1, 0, 0): ("LEFT",   (0, -1, 0)),
+    (0, 0, 1):  ("TOP",    (1, 0, 0)),
+    (0, 0, -1): ("BOTTOM", (1, 0, 0)),
+}
 
 
-def _comb(n, a, u, b, v):
-    """Construye una dirección combinando dos ejes de una cara del cubo. Se usa para obtener las normales de las caras, aristas y esquinas a partir de sus componentes."""
-    return tuple(n[k] + a * u[k] + b * v[k] for k in range(3))
+def _offset(direction):
+    """Distancia al origen del plano que limita la zona. Depende de si la zona es una cara, una arista o una esquina."""
+    cat = sum(1 for c in direction if c != 0)
+    return (1.0, EDGE_CUT, CORNER_CUT)[cat - 1]
+
+
+def _solve3(a, b):
+    """Resuelve el sistema 3×3 a·x = b con la regla de Cramer. Devuelve None si los tres planos no se cortan en un único punto."""
+    def det(m):
+        return (m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
+                - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
+                + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]))
+    d = det(a)
+    if abs(d) < 1e-9:
+        return None
+    out = []
+    for col in range(3):
+        m = [list(row) for row in a]
+        for r in range(3):
+            m[r][col] = b[r]
+        out.append(det(m) / d)
+    return tuple(out)
 
 
 def _build_cells():
-    """Genera las 26 zonas seleccionables del cubo: seis caras, doce aristas y ocho esquinas. Para cada zona calcula su dirección y los ejes locales que permiten dibujarla correctamente."""
+    """Genera las 26 zonas seleccionables: seis caras octogonales, doce aristas rectangulares y ocho esquinas hexagonales. Calcula los vértices del sólido intersecando planos y, para cada zona, ordena sus vértices alrededor de su normal."""
+    dirs = [(x, y, z) for x in (-1, 0, 1) for y in (-1, 0, 1) for z in (-1, 0, 1)
+            if (x, y, z) != (0, 0, 0)]
+    offs = [_offset(d) for d in dirs]
+
+    # Vértices del sólido: puntos donde se cortan tres planos y que no quedan fuera de ninguno.
+    verts = []
+    for i in range(len(dirs)):
+        for j in range(i + 1, len(dirs)):
+            for k in range(j + 1, len(dirs)):
+                p = _solve3((dirs[i], dirs[j], dirs[k]), (offs[i], offs[j], offs[k]))
+                if p is None:
+                    continue
+                if any(sum(d[a] * p[a] for a in range(3)) > o + 1e-7
+                       for d, o in zip(dirs, offs)):
+                    continue
+                if not any(max(abs(p[a] - q[a]) for a in range(3)) < 1e-6 for q in verts):
+                    verts.append(p)
+
     cells = []
-    for name, n, u, v in _FACES:
-        for i in (-1, 0, 1):
-            for j in (-1, 0, 1):
-                a0, a1 = _RANGES[i]
-                b0, b1 = _RANGES[j]
-                pts = [_comb(n, a, u, b, v)
-                       for a, b in ((a0, b0), (a1, b0), (a1, b1), (a0, b1))]
-                d = _comb(n, i, u, j, v)
-                direction = tuple(int(round(c)) for c in d)
-                cat = sum(1 for c in direction if c != 0)   # 1 face, 2 edge, 3 vertex
-                cells.append({"n": n, "u": u, "pts": pts, "dir": direction,
-                              "cat": cat, "label": name if cat == 1 else None})
+    for d, o in zip(dirs, offs):
+        n = normalize(tuple(float(c) for c in d))
+        pts = [p for p in verts if abs(sum(d[a] * p[a] for a in range(3)) - o) < 1e-6]
+        if len(pts) < 3:
+            continue
+        # Ordena los vértices en sentido antihorario visto desde fuera.
+        ref = (0.0, 0.0, 1.0) if abs(n[2]) < 0.9 else (1.0, 0.0, 0.0)
+        e1 = normalize(cross(ref, n))
+        e2 = cross(n, e1)
+        c0 = tuple(sum(p[a] for p in pts) / len(pts) for a in range(3))
+        pts.sort(key=lambda p: math.atan2(
+            sum((p[a] - c0[a]) * e2[a] for a in range(3)),
+            sum((p[a] - c0[a]) * e1[a] for a in range(3))))
+        cat = sum(1 for c in d if c != 0)   # 1 cara, 2 arista, 3 esquina
+        name, u = _FACES.get(d, (None, (1, 0, 0)))
+        cells.append({"n": n, "u": u, "pts": pts, "dir": d,
+                      "cat": cat, "label": name})
     return cells
-
-
-CELLS = _build_cells()
 
 
 ##------ OPERACIONES MATEMÁTICAS BÁSICAS ------##
@@ -166,3 +215,6 @@ def point_in_convex(p, poly):
             elif sign != s:
                 return False
     return True
+
+
+CELLS = _build_cells()

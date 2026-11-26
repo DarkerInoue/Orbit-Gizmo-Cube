@@ -233,7 +233,8 @@ def draw_viewcube():
     for c, poly, facing in cells:
         if c["label"] is None or facing < 0.3:
             continue
-        center = (sum(p[0] for p in poly) / 4, sum(p[1] for p in poly) / 4)
+        center = (sum(p[0] for p in poly) / len(poly),
+                  sum(p[1] for p in poly) / len(poly))
         uv = cube_math.mul_mv(R, c["u"])
         ang = math.atan2(uv[1], uv[0])
         du, dv = (math.cos(ang), math.sin(ang)), (-math.sin(ang), math.cos(ang))

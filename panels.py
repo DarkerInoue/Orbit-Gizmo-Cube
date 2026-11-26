@@ -31,6 +31,7 @@ class VC_PT_panel(bpy.types.Panel):
         col.prop(s, "frame_margin")
         col.prop(s, "step_angle")
         col.prop(s, "auto_clip")
+        col.prop(s, "axis_ortho")
 
 
 def _unit_button(row, uid, active):

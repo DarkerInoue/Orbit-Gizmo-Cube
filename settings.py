@@ -63,6 +63,11 @@ class VC_Settings(bpy.types.PropertyGroup):
         description="Adjust the viewport clip start / end to the zoom level, "
                     "so very small or very large objects are not cut off",
         update=redraw_all)
+    axis_ortho: BoolProperty(
+        name="Orthographic on Axis Views", default=True,
+        description="Clicking a face (Front, Back, Top...) switches to an "
+                    "orthographic side view, so the grid and axes of that "
+                    "plane are drawn. Rotating away restores perspective")
     step_angle: FloatProperty(name="Arrow Step", default=math.pi / 2,
                               min=math.radians(5), max=math.radians(90),
                               subtype='ANGLE')

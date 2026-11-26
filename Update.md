@@ -1,5 +1,12 @@
 # Update
 
+## Unreleased 1.0.2
+- The cube is now a bevelled cube (6 octagonal faces, 12 edge strips, 8 hexagonal corners).
+- Clicking Front / Back / Left / Right / Top / Bottom now puts Blender in a real
+  axis view (not "User Perspective"), so the grid and axes of that plane are drawn.
+  New option Navigation > Orthographic on Axis Views (on by default). Rotating
+  away from an axis view restores the previous projection.
+
 ## 1.0.1
 - Viewport clip start / end now follow the zoom (Navigation > Auto Clip
   Distance), so mm / micrometre objects are no longer cut off when you zoom
